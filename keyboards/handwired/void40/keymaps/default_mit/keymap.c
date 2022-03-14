@@ -29,10 +29,47 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	[_APEX] = LAYOUT_planck_mit(KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_LSFT, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_LCTL, KC_1, KC_3, KC_LALT, KC_4, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS),
 	[_RAISE] = LAYOUT_planck_mit(KC_TRNS, KC_F1, KC_F2, KC_F3, KC_F4, KC_F5, KC_F6, KC_F7, KC_F8, KC_F9, KC_F10, KC_TRNS, KC_TRNS, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6, KC_7, KC_8, KC_9, KC_0, KC_TRNS, KC_TRNS, KC_F11, KC_F12, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, TG(_APEX), KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_MPLY, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS),
 	[_LOWER] = LAYOUT_planck_mit(KC_TRNS, KC_PIPE, KC_PLUS, KC_AT, KC_HASH, KC_DLR, KC_NO, KC_RPRN, KC_RBRC, KC_RCBR, KC_NO, KC_TRNS, KC_TRNS, KC_EXLM, KC_EQL, KC_UNDS, KC_ASTR, KC_BSLS, KC_NO, KC_LPRN, KC_LBRC, KC_LCBR, KC_NO, KC_NO, KC_TRNS, KC_AMPR, KC_MINS, KC_NO, KC_NO, KC_PERC, KC_CIRC, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_HOME, KC_PGUP,KC_PGDN, KC_END),
-	[_ADJUST] = LAYOUT_planck_mit(RESET, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, EEP_RST, KC_NO, KC_NO, KC_NO, KC_TRNS, KC_MPLY, KC_TRNS, KC_MPRV, KC_VOLD, KC_VOLU, KC_MNXT)
+	[_ADJUST] = LAYOUT_planck_mit(RESET, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, EEP_RST, KC_NO, KC_NO, KC_NO, KC_TRNS, KC_MPLY, KC_TRNS, KC_MPRV, KC_VOLU,KC_VOLD, KC_MNXT)
 };
 
 
 layer_state_t layer_state_set_user(layer_state_t state) {
     return update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if ((get_oneshot_locked_mods() & MOD_MASK_SHIFT)) {
+        if (((KC_A <= keycode) && (keycode <= KC_Z))) {
+            if (record->event.pressed) {
+                del_mods(MOD_MASK_SHIFT);
+                del_oneshot_mods(MOD_MASK_SHIFT);
+
+                register_code(keycode);
+
+                add_mods(MOD_MASK_SHIFT);
+                add_oneshot_mods(MOD_MASK_SHIFT);
+            } else {
+                unregister_code(keycode);
+            }
+
+            return false;
+        }
+    }
+    return true;
+}
+
+void oneshot_locked_mods_changed_user(uint8_t mods) {
+    if ((mods & MOD_MASK_SHIFT)) {
+        if (!host_keyboard_led_state().caps_lock) {
+            tap_code(KC_CAPS);
+        }
+    } else if (!(mods & MOD_MASK_SHIFT)) {
+        if (host_keyboard_led_state().caps_lock) {
+            tap_code(KC_CAPS);
+
+            clear_oneshot_locked_mods();
+            del_oneshot_mods(MOD_MASK_SHIFT);
+            unregister_mods(MOD_MASK_SHIFT);
+        }
+    }
 }
