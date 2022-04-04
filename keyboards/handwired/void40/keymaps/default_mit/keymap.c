@@ -31,8 +31,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	[_ADJUST] = LAYOUT_planck_mit(RESET, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, EEP_RST, KC_NO, KC_TRNS, KC_NO, KC_TRNS, KC_MPLY, KC_TRNS, KC_MPRV, KC_VOLU, KC_VOLD, KC_MNXT)
 };
 
+layer_state_t state_on_adjust_activation;
 layer_state_t layer_state_set_user(layer_state_t state) {
-    return update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
+    bool prev_adjust_layer_state = IS_LAYER_ON_STATE(state, _ADJUST);
+    state = update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
+    bool curr_adjust_layer_state = IS_LAYER_ON_STATE(state, _ADJUST);
+
+    if(!prev_adjust_layer_state && curr_adjust_layer_state){
+        state_on_adjust_activation = prev_adjust_layer_state;
+    }
+    if(prev_adjust_layer_state && !curr_adjust_layer_state){
+        return state_on_adjust_activation;
+    }
+
+    return state;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
