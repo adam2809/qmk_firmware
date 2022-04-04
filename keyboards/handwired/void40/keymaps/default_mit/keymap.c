@@ -46,9 +46,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             clear_oneshot_locked_mods();
             unregister_mods(mods);
         }
-        if (is_oneshot_layer_active()) {
-            layer_clear();
-        }
+        layer_clear();
         return false;
     }
     if ((get_oneshot_locked_mods() & MOD_MASK_SHIFT)) {
